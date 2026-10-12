@@ -1,0 +1,8 @@
+PinyinVim Icons 1.0
+
+Two original icons (gear and return arrow), created for this project.
+Dedicated to the public domain under CC0 1.0 Universal.
+https://creativecommons.org/publicdomain/zero/1.0/
+
+The font contains only U+E001 and U+E002. It does not replace text fonts.
+Rebuild with make-icons.py and the build-only fontTools dependency.

@@ -1,0 +1,6 @@
+SIL OPEN FONT LICENSE Version 1.1
+
+Copyright 2014-2026 be5invis and contributors.
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+The complete license text is available at https://scripts.sil.org/OFL and in the Sarasa-Gothic source repository.

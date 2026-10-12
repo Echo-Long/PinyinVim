@@ -1,0 +1,38 @@
+name: Release draft
+on:
+  push:
+    tags: ['V*']
+permissions:
+  contents: write
+jobs:
+  draft:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: egor-tensin/setup-mingw@v3
+        id: mingw
+        with:
+          platform: x64
+      - name: Check tag and prepare assets
+        shell: pwsh
+        run: |
+          . ./native/release-common.ps1
+          $release = Get-PinyinRelease
+          if ($env:GITHUB_REF_NAME -ne $release.Display) { throw 'Tag must match package.json version' }
+          $gccPath = (Get-Command '${{ steps.mingw.outputs.gcc }}').Source
+          if (!(Get-Command gcc.exe -ErrorAction SilentlyContinue)) { Copy-Item -LiteralPath $gccPath -Destination (Join-Path (Split-Path $gccPath -Parent) 'gcc.exe') }
+          ./native/package.ps1
+      - name: Create draft release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          . ./native/release-common.ps1
+          $release = Get-PinyinRelease
+          $assets = @(Get-ChildItem -LiteralPath $release.Directory -Filter '*.zip' -File | ForEach-Object FullName)
+          $assets += Join-Path $release.Directory 'SHA256SUMS.txt'
+          gh release create $release.Display @assets --draft --verify-tag --title ('拼音浮笺 ' + $release.Display) --notes-file (Join-Path $release.Directory 'RELEASE_NOTES.md')
+          if ($LASTEXITCODE -ne 0) { throw 'Draft release creation failed' }

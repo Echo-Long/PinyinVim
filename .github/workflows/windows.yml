@@ -1,0 +1,33 @@
+name: Windows checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: egor-tensin/setup-mingw@v3
+        id: mingw
+        with:
+          platform: x64
+      - name: Build and verify package
+        shell: pwsh
+        run: |
+          $gccPath = (Get-Command '${{ steps.mingw.outputs.gcc }}').Source
+          if (!(Get-Command gcc.exe -ErrorAction SilentlyContinue)) { Copy-Item -LiteralPath $gccPath -Destination (Join-Path (Split-Path $gccPath -Parent) 'gcc.exe') }
+          ./native/package.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-release-candidate
+          path: |
+            dist/V*/*.zip
+            dist/V*/SHA256SUMS.txt
+            dist/V*/RELEASE_NOTES.md

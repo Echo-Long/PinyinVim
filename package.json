@@ -1,0 +1,18 @@
+{
+  "name": "pinyinvim",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Windows floating Neovim editor with local Chinese navigation",
+  "license": "MIT",
+  "scripts": {
+    "setup:runtime": "powershell -NoProfile -ExecutionPolicy Bypass -File native/setup-runtime.ps1",
+    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File native/build.ps1",
+    "test": "powershell -NoProfile -ExecutionPolicy Bypass -File native/test.ps1",
+    "start": "powershell -NoProfile -ExecutionPolicy Bypass -File native/start.ps1",
+    "package:win": "powershell -NoProfile -ExecutionPolicy Bypass -File native/package.ps1",
+    "package:native": "npm run package:win",
+    "data:regenerate": "powershell -NoProfile -ExecutionPolicy Bypass -File native/regenerate-data.ps1"
+  },
+  "devDependencies": { "pinyin-pro": "3.29.4" }
+}

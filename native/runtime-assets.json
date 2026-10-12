@@ -1,0 +1,16 @@
+{
+  "nvim": {
+    "version": "0.12.5",
+    "url": "https://github.com/neovim/neovim/releases/download/v0.12.5/nvim-win64.zip",
+    "archiveSha256": "de8625ba8cf65ebf40eb80a388ba1ec8e9c15b30218821e2c639119b05920de1",
+    "executable": "nvim/bin/nvim.exe",
+    "executableSha256": "6f1fd849f6be3d0bff7bcf433ca91e0ba7481d3cc31b34601e4a29d8fad5bbdd"
+  },
+  "neovide": {
+    "version": "0.16.2",
+    "url": "https://github.com/neovide/neovide/releases/download/0.16.2/neovide.exe.zip",
+    "archiveSha256": "d1e071d8bf676a500988820b852843e811fc8355396ce72e8f4c7ed2c744e2e2",
+    "executable": "neovide/neovide.exe",
+    "executableSha256": "b6b20dfc2d4fd7eb584fee46c7f6d4fd64c1ffaa2fcbf668f51e2d1a35d06f6a"
+  }
+}

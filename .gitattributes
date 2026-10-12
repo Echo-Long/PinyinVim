@@ -1,0 +1,16 @@
+* text=auto
+*.ps1 text eol=crlf
+*.cs text eol=crlf
+*.c text eol=lf
+*.h text eol=lf
+*.vim text eol=lf
+*.lua text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.ttf binary
+*.png binary
+*.ico binary
+*.exe binary
+*.dll binary
+*.zip binary

@@ -1,0 +1,22 @@
+{
+  "files": [
+    ".gitignore", ".gitattributes", "package.json", "package-lock.json", "README.md", "README.zh-CN.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "CHANGELOG.md",
+    "assets/branding/README.md", "assets/branding/export-icon.ps1", "assets/branding/pinyinvim-icon.png", "assets/branding/pinyinvim-icon-512.png", "assets/branding/pinyinvim-icon-256.png", "assets/branding/pinyinvim.ico", "assets/branding/pinyinvim-icon-preview.png",
+    "docs/build.md", "docs/release-plan.md", "docs/compatibility.md", "docs/roadmap.md", "docs/portable-readme.md", "docs/portable-readme.en.md", "docs/release-notes.template.md",
+    ".github/workflows/windows.yml", ".github/workflows/release.yml", ".github/ISSUE_TEMPLATE/bug.yml",
+    "native/README.md", "native/build.ps1", "native/start.ps1", "native/package.ps1", "native/test.ps1", "native/release-common.ps1",
+    "native/setup-runtime.ps1", "native/runtime-assets.json", "native/download.mjs", "native/regenerate-data.ps1", "native/source-files.json", "native/verify-release.ps1",
+    "native/prototypes/capsules/build.ps1", "native/prototypes/capsules/package.ps1", "native/prototypes/capsules/README.md",
+    "native/prototypes/capsules/CapsuleHost.cs", "native/prototypes/capsules/CapsuleSettings.cs", "native/prototypes/capsules/PreferencesWindow.cs",
+    "native/prototypes/capsules/CapsuleProcesses.cs", "native/prototypes/capsules/CapsuleGuiBridge.cs", "native/prototypes/capsules/window-policy.c",
+    "native/prototypes/capsules/gaussian-effect.h", "native/prototypes/capsules/desktop-effects.h", "native/prototypes/capsules/capsule-settings.vim", "native/prototypes/capsules/make-icons.py",
+    "native/prototypes/capsules/lua/pinyinvim/capsules.lua", "native/prototypes/capsules/assets/PinyinVimIcons.ttf", "native/prototypes/capsules/assets/ICONS-LICENSE.txt",
+    "native/vendor/jieba-dict.txt", "native/vendor/jieba-LICENSE", "native/vendor/neovide-LICENSE.txt", "native/vendor/pinyin-pro-LICENSE.txt", "native/vendor/neovim-APACHE-2.0.txt",
+    "native/vim/data/generate.mjs", "app/fonts/SarasaMonoSC-Regular.ttf", "app/fonts/OFL-1.1.txt", "app/fonts/README.md"
+  ],
+  "trees": ["native/host", "native/nvim"],
+  "tests": [
+    "WorkerTests.cs", "PastePolicyTests.cs", "FocusRestorePolicyTests.cs", "EditorSessionTests.cs", "ImeControllerTests.cs", "TargetIdentityTests.cs", "HostSubmitTests.cs", "ReleaseMetadataTests.cs", "NotificationSettingsTests.cs", "SettingsDescriptionPreview.cs",
+    "chinese.vim", "equivalence.vim", "find-equivalence.vim", "chinese-contract.vim", "navigation-regressions.vim", "nvim-contract.vim", "draft-contract.vim", "latency.vim", "capsule-feedback.vim"
+  ]
+}
