@@ -1,11 +1,22 @@
 -- Exercise real Neovim input and the redraw grid delivered to a UI client.
 -- Reading only capsule.inspect() misses extmarks that never reach the screen.
 local uv, fn = vim.uv, vim.fn
+local fixture = fn.tempname() .. '-capsule-startup'
+fn.mkdir(fixture, 'p')
+local config, draft = fixture .. '/init.vim', fixture .. '/draft.txt'
+fn.writefile({'今天 review 中文，明天 merge 项目。'}, draft)
+fn.writefile({'set rtp^=' .. fn.fnameescape(fn.getcwd() .. '/native/nvim'),
+  'runtime plugin/chinese.vim', 'lua vim.env.PINYINVIM_DRAFT=' .. string.format('%q',draft),
+  -- Reproduce Neovide's loaded draft with an unnamed buffer left current.
+  'lua vim.api.nvim_create_autocmd("VimEnter",{callback=function() vim.cmd.enew() end})',
+  'lua _G.caps=dofile(' .. string.format('%q',
+    fn.getcwd() .. '/native/prototypes/capsules/lua/pinyinvim/capsules.lua') .. '); caps.setup()'}, config)
 local stdin, stdout, stderr = uv.new_pipe(false), uv.new_pipe(false), uv.new_pipe(false)
 local responses, serial, exited, pending_win, grid = {}, 0, false, nil, nil
-local cells, errors, float_grids = {}, {}, {}
+local cells, errors, float_grids, message_cells = {}, {}, {}, {}
+local message_win, message_grid, message_width
 local child = assert(uv.spawn(vim.v.progpath, {
-  args={'--embed','-n','-u','NONE','-i','NONE'}, cwd=fn.getcwd(), stdio={stdin,stdout,stderr},
+  args={'--embed','-n','-u',config,'-i','NONE',draft}, cwd=fn.getcwd(), stdio={stdin,stdout,stderr},
 }, function() exited=true end))
 local unpacker = vim.mpack.Unpacker()
 stdout:read_start(function(err, data)
@@ -24,12 +35,20 @@ stdout:read_start(function(err, data)
           if event[1]=='win_float_pos' then
             float_grids[arg[2]]=arg[1]
             if pending_win and (arg[2]==pending_win or arg[2]==vim.mpack.encode(pending_win)) then grid=arg[1] end
+            if message_win and (arg[2]==message_win or arg[2]==vim.mpack.encode(message_win)) then message_grid=arg[1] end
           end
           if event[1]=='grid_clear' and arg[1]==grid then cells={} end
           if event[1]=='grid_line' and arg[1]==grid and arg[2]==0 then
             local col=arg[3]+1
             for _,cell in ipairs(arg[4]) do
               for _=1,(cell[3] or 1) do cells[col]=cell[1]; col=col+1 end
+            end
+          end
+          if event[1]=='grid_clear' and arg[1]==message_grid then message_cells={} end
+          if event[1]=='grid_line' and arg[1]==message_grid and arg[2]==0 then
+            local col=arg[3]+1
+            for _,cell in ipairs(arg[4]) do
+              for _=1,(cell[3] or 1) do message_cells[col]=cell[1]; col=col+1 end
             end
           end
         end
@@ -60,15 +79,28 @@ local function pending(text,label)
     label..': expected '..vim.inspect(text)..', received '..vim.inspect(displayed()))
   checks=checks+1
 end
+local function message_contains(text,label)
+  assert(vim.wait(2000,function()
+    local text_cells={}; for col=1,message_width do text_cells[col]=message_cells[col] or ' ' end
+    return table.concat(text_cells):find(text,1,true)~=nil
+  end,10),label)
+  checks=checks+1
+end
 local ok,err=xpcall(function()
   rpc('nvim_ui_attach',100,30,{ext_linegrid=true,ext_multigrid=true})
-  rpc('nvim_command','set rtp^=native/nvim')
-  rpc('nvim_command','runtime plugin/chinese.vim')
-  lua([[_G.caps=dofile('native/prototypes/capsules/lua/pinyinvim/capsules.lua'); caps.setup(); caps.start();
-    vim.api.nvim_buf_set_lines(caps.draft,0,-1,false,{'今天 review 中文，明天 merge 项目。'});
-    vim.api.nvim_win_set_cursor(caps.wins.editor,{1,0}); vim.cmd.redraw()]])
+  assert(vim.wait(3000,function() return lua('return _G.caps ~= nil and caps.wins.pending ~= nil') end,20),
+    'capsules must start after VimEnter and UI attachment')
+  assert(lua([[local path=...; return vim.api.nvim_buf_get_name(caps.draft):gsub('\\','/'):lower()
+    ==vim.fn.fnamemodify(path,':p'):gsub('\\','/'):lower()]],draft),'real command-line draft owns the editor buffer')
+  checks=checks+1
+  assert(lua('return vim.api.nvim_buf_get_lines(caps.draft,0,-1,false)[1]') == '今天 review 中文，明天 merge 项目。',
+    'startup preserves the loaded draft despite an unnamed current buffer')
+  checks=checks+1
   pending_win=lua('return caps.wins.pending')
   grid=float_grids[pending_win] or float_grids[vim.mpack.encode(pending_win)]
+  message_win=lua('return caps.wins.message')
+  message_grid=float_grids[message_win] or float_grids[vim.mpack.encode(message_win)]
+  message_width=lua('return vim.api.nvim_win_get_width(caps.wins.message)')
 
   input('2'); pending('2','one count digit paints before the next key')
   input('f'); pending('2f','count is not duplicated by Chinese find')
@@ -103,6 +135,21 @@ local ok,err=xpcall(function()
   checks=checks+1
   input('g'); pending('g','native multi-key command paints')
   input('g'); pending('','native multi-key completion clears')
+
+  input('i<C-a>'); message_contains('E29','native last-insert error reaches the UI')
+  lua('caps.begin_session()')
+  assert(lua('return caps.message == "" and not caps.message_error'),'new session clears an earlier error')
+  checks=checks+1
+  lua([[vim.cmd([=[function! PinyinSubmit() abort
+    let g:submit_calls=get(g:,'submit_calls',0)+1
+  endfunction
+  function! PinyinHide() abort
+  endfunction]=]); caps.apply_settings({})]])
+  input('<C-CR>'); message_contains('请松开','submit shortcut paints the release hint')
+  assert(lua('return vim.g.submit_calls')==1,'submit shortcut retains the existing submit function')
+  checks=checks+1
+  lua([[vim.g.pinyinvim_notice='已发送粘贴']])
+  message_contains('已发送粘贴','host notice paints without a pending-key change')
 end,function(e) return debug.traceback(vim.inspect(e),2) end)
 pcall(rpc,'nvim_input','\27')
 pcall(rpc,'nvim_command','qa!')

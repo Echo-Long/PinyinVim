@@ -4,7 +4,7 @@ local api, fn = vim.api, vim.fn
 local M = { wins = {}, bufs = {}, message = '', pending = '', cmdlines = {}, history = {} }
 local ns = api.nvim_create_namespace('pinyinvim.capsules')
 local queued, started, timer = false, false, nil
-local painted_pending
+local painted_feedback
 local buttons = { 'mode', 'pending', 'settings', 'submit' }
 local icons = { settings = '\u{e001}', submit = '\u{e002}' }
 local blank_border = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' }
@@ -207,7 +207,7 @@ function M.apply_settings(settings)
   local actions = {
     hide = { modes = {'n'}, lhs = settings.hideNotation or '<Esc>', run = function() fn.PinyinHide() end },
     settings = { modes = {'n','i','x'}, lhs = settings.settingsNotation or '<F2>', run = function() fn.PinyinSettingsView() end },
-    submit = { modes = {'n','i','x'}, lhs = settings.submitNotation or '<C-CR>', run = function() fn.PinyinSubmit() end },
+    submit = { modes = {'n','i','x'}, lhs = settings.submitNotation or '<C-CR>', run = function() M.submit() end },
     copy = { modes = {'n','i','x'}, lhs = settings.copyNotation or '<C-c>', run = function() M.copy() end },
     paste = { modes = {'i'}, lhs = settings.pasteNotation or '<C-v>', run = function() M.paste() end },
   }
@@ -335,15 +335,30 @@ function M.render()
 
 end
 
-local function render_pending()
+local function render_feedback()
   if not started then return end
   M.render()
-  -- getchar() does not redraw changed extmarks itself. Flush only when the
-  -- displayed command changes, including cancellation; idle ticks stay idle.
-  if M.control_texts.pending ~= painted_pending then
-    painted_pending = M.control_texts.pending
+  -- Changes from getchar(), mode events and the host bridge all need to reach
+  -- the UI. Compare presentation state so unchanged timer ticks stay idle.
+  local feedback = table.concat({M.control_texts.pending, M.control_texts.mode,
+    M.message_text or '', tostring(M.message_error), tostring(M.render_revision)}, '\0')
+  if feedback ~= painted_feedback then
+    painted_feedback = feedback
     api.nvim__redraw({ flush = true })
   end
+end
+
+function M.begin_session()
+  -- Keep :messages history, but do not show an earlier session's error again.
+  M.message, M.message_error = '', false
+  render_feedback()
+end
+
+function M.submit()
+  M.message, M.message_error = '', false
+  vim.g.pinyinvim_notice = '提交中，请松开按键或鼠标'
+  render_feedback()
+  fn.PinyinSubmit()
 end
 
 local function refresh()
@@ -351,7 +366,7 @@ local function refresh()
   queued = true
   vim.schedule(function()
     queued = false
-    if started then M.render() end
+    render_feedback()
   end)
 end
 
@@ -474,7 +489,7 @@ local function ui_event(event, ...)
     M.pending = chunks_text(args[1])
     -- Native count/operator waits can delay scheduled callbacks until the
     -- next key. This event normally runs in safe context and can paint now.
-    if vim.in_fast_event() then vim.schedule(render_pending) else render_pending() end
+    if vim.in_fast_event() then vim.schedule(render_feedback) else render_feedback() end
     return true
   end
   -- Mark messages handled before deferring API mutations out of fast context.
@@ -561,7 +576,7 @@ function M.release()
   if name == pressed and M.hovered == pressed and (name == 'settings' or name == 'submit') then
     vim.schedule(function()
       api.nvim_set_current_win(M.wins.editor)
-      if name == 'settings' then fn.PinyinSettingsView() else fn.PinyinSubmit() end
+      if name == 'settings' then fn.PinyinSettingsView() else M.submit() end
       refresh()
     end)
   end
@@ -587,8 +602,13 @@ end
 
 function M.start()
   if started then return end
+  -- Neovide can leave the unnamed buffer current even after loading the
+  -- command-line file. Reuse the host's named draft buffer, not that transient
+  -- current buffer; bufadd/bufload preserve an already loaded draft's contents.
+  local draft = vim.env.PINYINVIM_DRAFT
+  M.draft = draft and draft ~= '' and fn.bufadd(draft) or api.nvim_get_current_buf()
+  fn.bufload(M.draft)
   started = true
-  M.draft = api.nvim_get_current_buf()
   M.root = api.nvim_get_current_win()
   M.editor_options = {}
   for _, option in ipairs({ 'number', 'relativenumber', 'numberwidth', 'cursorline', 'wrap',
@@ -624,7 +644,7 @@ function M.start()
   -- The Chinese f/t mapping waits in getchar() and exposes its pending key as
   -- a global. A small timer reads that state; it never consumes or adds keys.
   timer = vim.uv.new_timer()
-  timer:start(80, 80, vim.schedule_wrap(render_pending))
+  timer:start(80, 80, vim.schedule_wrap(render_feedback))
   api.nvim_create_autocmd('VimLeavePre', { group = group, callback = function()
     started = false
     timer:stop(); timer:close()
@@ -662,7 +682,16 @@ function M.setup()
     vim.keymap.set(mode, '<C-ScrollWheelDown>', function() fn.PinyinCapsuleAdjustFont(-1) end, { silent = true })
   end
   if vim.env.PINYINVIM_CAPSULE_RPC then fn.serverstart(vim.env.PINYINVIM_CAPSULE_RPC) end
-  api.nvim_create_autocmd('UIEnter', { once = true, callback = function() vim.schedule(M.start) end })
+  -- UIEnter can precede command-line file loading in an embedded startup.
+  -- Capturing the buffer then binds the editor to an unnamed buffer instead
+  -- of the real draft and bypasses the existing persistence checks.
+  local function start_when_ready()
+    vim.schedule(function()
+      if vim.v.vim_did_enter == 1 and #api.nvim_list_uis() > 0 then M.start() end
+    end)
+  end
+  api.nvim_create_autocmd({ 'UIEnter', 'VimEnter' }, { callback = start_when_ready })
+  start_when_ready()
 end
 
 return M

@@ -79,6 +79,7 @@ endfunction
 '@
 $bridgeText = $bridgeText.Replace("execute 'set guifont=Consolas,等距更纱黑体\ SC:h'", "execute 'set guifont=Consolas,PinyinVim\ Icons,Microsoft\ YaHei\ UI,等距更纱黑体\ SC:h'")
 $bridgeText = Replace-Once $bridgeText "  let l:size = max([10, min([28, get(a:settings, 'fontSize', 14)])])" "  call luaeval(`"require('pinyinvim.capsules').apply_settings(_A)`", a:settings)`n  let l:size = max([10, min([28, get(a:settings, 'fontSize', 14)])])"
+$bridgeText = Replace-Once $bridgeText "    let g:pinyinvim_notice = ''`n    call s:ApplySettings" "    let g:pinyinvim_notice = ''`n    lua require('pinyinvim.capsules').begin_session()`n    call s:ApplySettings"
 $bridgeText = Replace-Once $bridgeText 'function! PinyinSettingsView() abort' 'function! s:BaseSettingsView() abort'
 $bridgeText = Replace-Once $bridgeText "  elseif l:kind ==# 'capsule-geometry'" "  elseif l:kind ==# 'capsule-notice'`n    let g:pinyinvim_notice = get(a:message, 'text', '')`n    lua require('pinyinvim.capsules').render()`n  elseif l:kind ==# 'capsule-geometry'"
 $bridgeText += "`n" + [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'capsule-settings.vim'))
