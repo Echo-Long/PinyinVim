@@ -12,7 +12,7 @@ namespace PinyinVim.Native.Tests
             Check(!PastePolicy.AllowsForeground(new IntPtr(7), 88, new IntPtr(9), new IntPtr(3), 99), "foreign foreground");
             Check(PastePolicy.SameRuntimeId(new[] { 1, 2 }, new[] { 1, 2 }), "runtime identity");
             Check(!PastePolicy.SameRuntimeId(new[] { 1, 2 }, new[] { 1, 3 }), "different runtime identity");
-            Check(PastePolicy.FailureMessage("key-release-timeout").IndexOf("按键") >= 0, "key message");
+            Check(PastePolicy.FailureMessage("keys-not-released").IndexOf("输入状态") >= 0, "changed input message does not tell user to release the submission key");
             Check(PastePolicy.FailureMessage("foreground-changed").IndexOf("窗口") >= 0, "window message");
             Check(PastePolicy.FailureMessage("uia-focus-mismatch").IndexOf("已复制到剪贴板") >= 0, "fallback explicitly names clipboard");
             Check(PastePolicy.FailureMessage("uia-provider-failed").IndexOf("超时") < 0, "provider refusal is not reported as timeout");

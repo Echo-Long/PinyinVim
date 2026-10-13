@@ -56,7 +56,7 @@ namespace PinyinVim.Native
         private const int GWL_STYLE = -16;
         private const long ES_READONLY = 0x0800;
         private const long ES_PASSWORD = 0x0020;
-        private const int KEY_RELEASE_TIMEOUT_MS = 800;
+        private const int UNRELATED_INPUT_TIMEOUT_MS = 800;
         // Browser/desktop chat controls can take a few hundred milliseconds to
         // reactivate after the editor is hidden.  The previous 120/900 ms
         // budget made the one-shot Ctrl+V path fail even though the right
@@ -64,7 +64,7 @@ namespace PinyinVim.Native
         // enough time for Chromium/Electron UIA providers to restore focus.
         private const int FOREGROUND_TIMEOUT_MS = 800;
         private const int PASTE_TIMEOUT_MS = 2500;
-        private const int CALLER_TIMEOUT_MS = KEY_RELEASE_TIMEOUT_MS + PASTE_TIMEOUT_MS + 100;
+        private const int CALLER_TIMEOUT_MS = UNRELATED_INPUT_TIMEOUT_MS + PASTE_TIMEOUT_MS + 100;
 
         private static readonly object StateLock = new object();
         private static readonly object PasteLock = new object();
@@ -176,7 +176,12 @@ namespace PinyinVim.Native
             return RestoreAsync(target, editorWindow, false);
         }
 
-        private static Task<PasteResult> RestoreAsync(InputTarget target, IntPtr editorWindow, bool paste)
+        internal static Task<PasteResult> RestoreForSubmissionAsync(InputTarget target, IntPtr editorWindow, bool paste, ISubmissionInput input)
+        {
+            return RestoreAsync(target, editorWindow, paste, input);
+        }
+
+        private static Task<PasteResult> RestoreAsync(InputTarget target, IntPtr editorWindow, bool paste, ISubmissionInput input = null)
         {
             TaskCompletionSource<PasteResult> completion = new TaskCompletionSource<PasteResult>();
             if (target == null || (paste && !target.Editable) || target.Window == IntPtr.Zero)
@@ -199,7 +204,7 @@ namespace PinyinVim.Native
             {
                 Stopwatch timer = Stopwatch.StartNew();
                 PasteResult result;
-                try { result = RestoreAndPaste(target, editorWindow, timer, paste); }
+                try { result = RestoreAndPaste(target, editorWindow, timer, paste, input); }
                 catch (ElementNotAvailableException) { result = Failure("uia-target-unavailable"); }
                 catch (InvalidOperationException) { result = Failure("uia-provider-failed"); }
                 catch (Exception) { result = Failure("unexpected-error"); }
@@ -230,13 +235,14 @@ namespace PinyinVim.Native
             return completion.Task;
         }
 
-        private static PasteResult RestoreAndPaste(InputTarget target, IntPtr editorWindow, Stopwatch timer, bool paste)
+        private static PasteResult RestoreAndPaste(InputTarget target, IntPtr editorWindow, Stopwatch timer, bool paste, ISubmissionInput input)
         {
             if (!IsCurrentSession(target)) return Failure("session-changed");
             if (!IsSameWindow(target)) return Failure("target-window-unavailable");
-            while (!InputReleased())
+            if (input != null && !input.Ready) return Failure("input-isolation-unavailable");
+            while (!InputReady(input))
             {
-                if (timer.ElapsedMilliseconds >= KEY_RELEASE_TIMEOUT_MS) return Failure("key-release-timeout");
+                if (timer.ElapsedMilliseconds >= UNRELATED_INPUT_TIMEOUT_MS) return Failure("input-state-changed");
                 if (!IsCurrentSession(target) || !IsSameWindow(target)) return Failure("session-changed");
                 if (!IsAllowedForeground(target, editorWindow)) return Failure("foreground-changed");
                 Thread.Sleep(4);
@@ -296,7 +302,7 @@ namespace PinyinVim.Native
                 if (!paste && !target.Editable)
                 {
                     if (!CanContinue(target, restoreTimer)) return Failure(IsCurrentSession(target) ? "operation-timeout" : "session-changed");
-                    if (!InputReleased() || GetForegroundWindow() != target.Window) return Failure("focus-or-keys-changed");
+                    if (!InputReady(input) || GetForegroundWindow() != target.Window) return Failure("focus-or-keys-changed");
                     return new PasteResult(true, "focus-restored");
                 }
 
@@ -312,7 +318,7 @@ namespace PinyinVim.Native
                     string focusFailure = FocusRestorePolicy.Wait(
                         () => !CanContinue(target, restoreTimer) ? (IsCurrentSession(target) ? "operation-timeout" : "session-changed")
                             : GetForegroundWindow() != target.Window ? "foreground-changed"
-                            : !InputReleased() ? "focus-or-keys-changed" : null,
+                            : !InputReady(input) ? "focus-or-keys-changed" : null,
                         () => IsMatchingUiaTarget(target, ResolveFocusedInput(target, AutomationElement.FocusedElement, false)),
                         () =>
                         {
@@ -339,15 +345,11 @@ namespace PinyinVim.Native
 
                 if (!paste) return new PasteResult(true, "focus-restored");
 
-                INPUT[] inputs = new INPUT[4];
-                inputs[0] = Keyboard(VK_CONTROL, false);
-                inputs[1] = Keyboard(VK_V, false);
-                inputs[2] = Keyboard(VK_V, true);
-                inputs[3] = Keyboard(VK_CONTROL, true);
+                INPUT[] inputs = PasteInputs(input);
 
                 // Recheck immediately before the one and only input submission.
                 if (!CanContinue(target, restoreTimer)) return Failure(IsCurrentSession(target) ? "operation-timeout" : "session-changed");
-                if (!InputReleased()) return Failure("keys-not-released");
+                if (!InputReady(input)) return Failure("keys-not-released");
                 if (!IsSameWindow(target)) return Failure("target-window-unavailable");
                 if (GetForegroundWindow() != target.Window) return Failure("foreground-changed");
                 if (target.IsUiaTarget)
@@ -371,7 +373,7 @@ namespace PinyinVim.Native
                     if (!IsExpectedFocus(target)) return Failure("native-focus-mismatch");
                     if (!IsNativeEdit(target.Focus, out editReason, out editable) || !editable) return Failure("target-readonly-or-disabled");
                 }
-                if (!InputReleased() || !CanContinue(target, restoreTimer) || GetForegroundWindow() != target.Window)
+                if (!InputReady(input) || !CanContinue(target, restoreTimer) || GetForegroundWindow() != target.Window)
                     return Failure("focus-or-keys-changed");
                 if (SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT))) != inputs.Length)
                     return Failure("send-input-failed");
@@ -575,7 +577,62 @@ namespace PinyinVim.Native
             input.type = INPUT_KEYBOARD;
             input.union.keyboard.wVk = key;
             input.union.keyboard.dwFlags = keyUp ? KEYEVENTF_KEYUP : 0;
+            if (key == 0xA3 || key == 0xA5) input.union.keyboard.dwFlags |= 1; // Right Ctrl/Alt are extended keys.
             return input;
+        }
+
+        private static INPUT[] PasteInputs(ISubmissionInput input)
+        {
+            var keys = new System.Collections.Generic.List<INPUT>();
+            keys.Add(Keyboard(VK_CONTROL, false));
+            int[] restore = input == null ? new int[0] : input.RestoreModifiers();
+            // Ctrl is already down while Alt is released, preventing a bare
+            // Alt release from becoming a menu activation before Ctrl+V.
+            foreach (int key in restore)
+                if (key == 0xA0 || key == 0xA1 || key == 0xA4 || key == 0xA5)
+                    keys.Add(Keyboard((ushort)key, true));
+            keys.Add(Keyboard(VK_V, false));
+            keys.Add(Keyboard(VK_V, true));
+            foreach (int key in restore)
+                if (key == 0xA0 || key == 0xA1 || key == 0xA4 || key == 0xA5)
+                {
+                    INPUT restored = Keyboard((ushort)key, false);
+                    restored.union.keyboard.dwExtraInfo = WindowsSubmissionInput.RestoreMarker;
+                    keys.Add(restored);
+                }
+            keys.Add(Keyboard(VK_CONTROL, true));
+            foreach (int key in restore)
+                if (key == 0xA2)
+                {
+                    INPUT restored = Keyboard((ushort)key, false);
+                    restored.union.keyboard.dwExtraInfo = WindowsSubmissionInput.RestoreMarker;
+                    keys.Add(restored);
+                }
+            for (int i = 0; i < keys.Count; i++)
+            {
+                INPUT key = keys[i];
+                if (key.union.keyboard.dwExtraInfo == UIntPtr.Zero) key.union.keyboard.dwExtraInfo = WindowsSubmissionInput.InputMarker;
+                keys[i] = key;
+            }
+            return keys.ToArray();
+        }
+
+        internal static bool ReleaseSubmissionTriggers(int[] triggers)
+        {
+            if (triggers.Length == 0) return true;
+            INPUT[] keys = new INPUT[triggers.Length];
+            for (int i = 0; i < triggers.Length; i++)
+            {
+                keys[i] = Keyboard((ushort)triggers[i], true);
+                keys[i].union.keyboard.dwExtraInfo = WindowsSubmissionInput.InputMarker;
+            }
+            return SendInput((uint)keys.Length, keys, Marshal.SizeOf(typeof(INPUT))) == keys.Length;
+        }
+
+        private static bool InputReady(ISubmissionInput input)
+        {
+            if (input == null) return InputReleased();
+            return input.Ready && SubmissionKeyState.AcceptsInput(IsKeyDown, input.OwnsTrigger, input.AllowsModifier);
         }
 
         private static void Log(string name, double milliseconds)
@@ -605,6 +662,7 @@ namespace PinyinVim.Native
                 if ((GetAsyncKeyState(key) & 0x8000) != 0) return false;
             return true;
         }
+        internal static bool IsKeyDown(int key) { return (GetAsyncKeyState(key) & 0x8000) != 0; }
         [DllImport("user32.dll")] private static extern short GetAsyncKeyState(int key);
 
         private static IntPtr GetWindowLongValue(IntPtr hwnd, int index)

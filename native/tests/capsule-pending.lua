@@ -145,7 +145,7 @@ local ok,err=xpcall(function()
   endfunction
   function! PinyinHide() abort
   endfunction]=]); caps.apply_settings({})]])
-  input('<C-CR>'); message_contains('请松开','submit shortcut paints the release hint')
+  input('<C-CR>'); message_contains('正在提交','submit shortcut paints acceptance without asking for key-up')
   assert(lua('return vim.g.submit_calls')==1,'submit shortcut retains the existing submit function')
   checks=checks+1
   lua([[vim.g.pinyinvim_notice='已发送粘贴']])

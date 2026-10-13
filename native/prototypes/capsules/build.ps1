@@ -153,6 +153,7 @@ $program = Replace-Once $program '            session++;' '            capsuleSe
             session++;'
 $program = Replace-Once $program '            if (ready) Send(new Dictionary<string, object> { {"kind", "settings-view"} });' '            ShowCapsuleSettings();'
 $program = Replace-Once $program 'bool ok = await Submit(GetString(message, "text"));' 'bool ok = await SubmitCapsule(GetString(message, "text"));'
+$program = Replace-Once $program 'int SubmissionVirtualKey() { return 13; }' 'int SubmissionVirtualKey() { CapsuleShortcut shortcut; string error; return CapsuleShortcut.TryParse(GetString(settings, "submitHotkey"), false, out shortcut, out error) ? (int)shortcut.Key : 13; }'
 $program = Replace-Once $program '                Win.SetWindowPos(editorWindow, IntPtr.Zero, x, y, width, height, 0x0010);' '                Win.SetWindowPos(editorWindow, IntPtr.Zero, x, y, width, height, 0x0010);
                 KeepCapsuleOnScreen();'
 $program = Replace-Once $program '                if (invocation != null) { Metric("hotkey-to-vim-ready", invocation.Elapsed.TotalMilliseconds); invocation = null; }' '                if (!activeSession.IsCurrent(message.ContainsKey("session") ? message["session"] : null)) { SendAck(message, "session-ready-ack", false, "stale-session"); return; }

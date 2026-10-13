@@ -356,7 +356,7 @@ end
 
 function M.submit()
   M.message, M.message_error = '', false
-  vim.g.pinyinvim_notice = '提交中，请松开按键或鼠标'
+  vim.g.pinyinvim_notice = '正在提交…'
   render_feedback()
   fn.PinyinSubmit()
 end

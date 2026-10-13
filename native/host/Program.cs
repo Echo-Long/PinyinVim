@@ -66,6 +66,7 @@ namespace PinyinVim.Native
         Dictionary<string, object> settings;
         long session;
         bool visible, clearNext, submitting, quitting, ready, disposed, shownInitially, preparingNoticeShown, bridgeReadyPending, completingReady;
+        ISubmissionPlatform submissionPlatform = new WindowsSubmissionPlatform();
         bool clearDraftOnExit;
         string lastSubmitReason = "copied";
         string clearHash = "";
@@ -607,32 +608,29 @@ namespace PinyinVim.Native
             if (submitting) return false;
             submitting = true;
             var watch = Stopwatch.StartNew();
+            ISubmissionInput input = null;
             try
             {
                 lastSubmitReason = "clipboard-failed";
-                bool copied = false;
-                for (int n = 0; n < 6; n++)
-                {
-                    try { Clipboard.SetText(text, TextDataFormat.UnicodeText); copied = true; break; }
-                    catch (ExternalException) { }
-                    await Task.Delay(8);
-                }
+                // Accept the immutable request and hide immediately. Neither
+                // physical key-up nor a slow target provider gates dismissal.
+                input = submissionPlatform.CaptureKeys(SubmissionVirtualKey());
+                HideEditor();
+                Metric("submit-to-hide", watch.Elapsed.TotalMilliseconds);
+                bool copied = await submissionPlatform.CopyAsync(text);
                 if (!copied) { ShowNotification(1800, "拼音浮笺", "剪贴板暂时被占用，草稿仍在。", ToolTipIcon.Info); return false; }
                 Metric("submit-to-clipboard", watch.Elapsed.TotalMilliseconds);
-                // Keep Vim available while the submission keys are held. Hiding
-                // first discarded the foreground relationship used to restore focus.
                 bool pasted = false;
                 PasteResult pasteResult = null;
                 if (activeSession.Route == SubmitRoute.Paste && target != null && target.Editable && text.Length > 0)
                 {
-                    pasteResult = await NativeWindows.RestoreAndPasteAsync(target, editorWindow);
+                    pasteResult = await submissionPlatform.DeliverAsync(target, editorWindow, true, input);
                     pasted = pasteResult.Success;
                 }
                 else if (target != null && target.Window != IntPtr.Zero)
                 {
-                    await NativeWindows.RestoreFocusAsync(target, editorWindow);
+                    await submissionPlatform.DeliverAsync(target, editorWindow, false, input);
                 }
-                HideEditor();
                 Metric(pasted ? "submit-to-paste" : "submit-to-clipboard-mode", watch.Elapsed.TotalMilliseconds);
                 // SendInput confirms dispatch, not target text acceptance.
                 // Keep a local recovery copy before the next session clears.
@@ -655,8 +653,10 @@ namespace PinyinVim.Native
                 if (notice != null) ShowNotification(1800, "拼音浮笺", notice, ToolTipIcon.Info);
                 return true;
             }
-            finally { submitting = false; }
+            finally { if (input != null) input.Complete(); submitting = false; }
         }
+
+        int SubmissionVirtualKey() { return 13; }
 
         void HideEditor()
         {
@@ -835,6 +835,7 @@ namespace PinyinVim.Native
         void Quit()
         {
             quitting = true;
+            NativeWindows.CancelPaste();
             bool clearOnClose = settings.ContainsKey("clearOnClose") && Convert.ToBoolean(settings["clearOnClose"]);
             clearDraftOnExit = clearOnClose;
             if (editor != null && !editor.HasExited)
@@ -871,6 +872,9 @@ namespace PinyinVim.Native
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             disposed = true; Win.UnregisterHotKey(Handle,1);
+            NativeWindows.CancelPaste();
+            var submissionCleanup = submissionPlatform as IDisposable;
+            if (submissionCleanup != null) submissionCleanup.Dispose();
             if (windowRepairTimer != null) { windowRepairTimer.Stop(); windowRepairTimer.Dispose(); windowRepairTimer = null; }
             if (backgroundHideTimer != null) { backgroundHideTimer.Stop(); backgroundHideTimer.Dispose(); backgroundHideTimer = null; }
             StopBootstrapHideThread();

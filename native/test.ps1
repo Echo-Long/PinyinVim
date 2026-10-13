@@ -39,10 +39,11 @@ try {
     $contracts = @(
         @{Name='WorkerTests'; Sources=@('host/BoundedWorker.cs','tests/WorkerTests.cs'); References=@()},
         @{Name='PastePolicyTests'; Sources=@('host/PastePolicy.cs','tests/PastePolicyTests.cs'); References=@()},
+        @{Name='SubmissionKeyStateTests'; Sources=@('host/SubmissionKeyState.cs','tests/SubmissionKeyStateTests.cs'); References=@()},
         @{Name='FocusRestorePolicyTests'; Sources=@('host/FocusRestorePolicy.cs','tests/FocusRestorePolicyTests.cs'); References=@()},
         @{Name='EditorSessionTests'; Sources=@('host/EditorSession.cs','tests/EditorSessionTests.cs'); References=@()},
         @{Name='ImeControllerTests'; Sources=@('host/ImeStateController.cs','tests/ImeControllerTests.cs'); References=@()},
-        @{Name='TargetIdentityTests'; Sources=@('host/WindowsIntegration.cs','host/FocusRestorePolicy.cs','host/BoundedWorker.cs','host/PastePolicy.cs','tests/TargetIdentityTests.cs'); References=@("/r:$framework/WPF/UIAutomationClient.dll","/r:$framework/WPF/UIAutomationTypes.dll","/r:$framework/WPF/WindowsBase.dll")}
+        @{Name='TargetIdentityTests'; Sources=@('host/WindowsIntegration.cs','host/SubmissionPlatform.cs','host/SubmissionKeyState.cs','host/FocusRestorePolicy.cs','host/BoundedWorker.cs','host/PastePolicy.cs','tests/TargetIdentityTests.cs'); References=@('/r:System.Windows.Forms.dll',"/r:$framework/WPF/UIAutomationClient.dll","/r:$framework/WPF/UIAutomationTypes.dll","/r:$framework/WPF/WindowsBase.dll")}
     )
     foreach ($contract in $contracts) {
         $output = Join-Path $testOutput ($contract.Name + '.exe')
@@ -55,8 +56,9 @@ try {
     }
     if ($HostExecutable) {
         $hostPath = (Resolve-Path -LiteralPath $HostExecutable).Path
+        Copy-Item -LiteralPath $hostPath -Destination (Join-Path $testOutput ([IO.Path]::GetFileName($hostPath)))
         $output = Join-Path $testOutput 'HostSubmitTests.exe'
-        & $compiler /nologo /target:exe /r:System.Web.Extensions.dll "/out:$output" (Join-Path $PSScriptRoot 'tests/HostSubmitTests.cs')
+        & $compiler /nologo /target:exe /r:System.Web.Extensions.dll "/r:$hostPath" "/out:$output" (Join-Path $PSScriptRoot 'tests/HostSubmitTests.cs')
         if ($LASTEXITCODE -ne 0) { throw 'Host contract compilation failed' }
         & $output $hostPath
         if ($LASTEXITCODE -ne 0) { throw 'Actual host submission contract failed' }

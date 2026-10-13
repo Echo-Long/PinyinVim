@@ -21,8 +21,10 @@ namespace PinyinVim.Native
         {
             switch (reason)
             {
-                case "key-release-timeout": case "keys-not-released": case "focus-or-keys-changed":
-                    return "提交按键或鼠标尚未松开，未自动粘贴。文字已复制到剪贴板，草稿已保留。";
+                case "key-release-timeout": case "keys-not-released": case "focus-or-keys-changed": case "input-state-changed":
+                    return "回填期间输入状态发生变化，未自动粘贴。文字已复制到剪贴板，草稿已保留。";
+                case "input-isolation-unavailable":
+                    return "未能隔离本次提交按键，未自动粘贴。文字已复制到剪贴板，草稿已保留。";
                 case "foreground-changed": case "session-changed":
                     return "当前窗口已切换，本次自动粘贴已取消。文字已复制到剪贴板，草稿已保留。";
                 case "operation-timeout":

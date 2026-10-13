@@ -16,7 +16,7 @@
   ],
   "trees": ["native/host", "native/nvim"],
   "tests": [
-    "WorkerTests.cs", "PastePolicyTests.cs", "FocusRestorePolicyTests.cs", "EditorSessionTests.cs", "ImeControllerTests.cs", "TargetIdentityTests.cs", "HostSubmitTests.cs", "ReleaseMetadataTests.cs", "NotificationSettingsTests.cs", "SettingsDescriptionPreview.cs",
+    "WorkerTests.cs", "PastePolicyTests.cs", "SubmissionKeyStateTests.cs", "FocusRestorePolicyTests.cs", "EditorSessionTests.cs", "ImeControllerTests.cs", "TargetIdentityTests.cs", "HostSubmitTests.cs", "ReleaseMetadataTests.cs", "NotificationSettingsTests.cs", "SettingsDescriptionPreview.cs",
     "chinese.vim", "equivalence.vim", "find-equivalence.vim", "chinese-contract.vim", "navigation-regressions.vim", "nvim-contract.vim", "draft-contract.vim", "latency.vim", "capsule-feedback.vim", "capsule-pending.lua"
   ]
 }

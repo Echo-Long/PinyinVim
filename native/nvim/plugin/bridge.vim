@@ -338,6 +338,7 @@ endfunction
 
 function! PinyinSubmit() abort
   if s:settings_view | return | endif
+  call s:PersistDraft()
   call s:Send({'kind':'submit-request','text':join(getline(1,'$'),"\n")}, 1)
 endfunction
 
