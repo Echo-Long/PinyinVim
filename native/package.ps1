@@ -1,4 +1,4 @@
-﻿param([switch]$UseExistingBuild, [switch]$FocusedUiChecks)
+param([switch]$UseExistingBuild, [switch]$FocusedUiChecks)
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'release-common.ps1')
 $release = Get-PinyinRelease
@@ -13,7 +13,7 @@ foreach ($folder in @('runtime','fonts','licenses','nvim')) {
     Copy-Item -LiteralPath (Join-Path $release.BuildDirectory $folder) -Destination $release.PortableDirectory -Recurse
 }
 foreach ($file in @('PinyinVim.exe','CapsuleWindowPolicy.dll')) { Copy-Item -LiteralPath (Join-Path $release.BuildDirectory $file) -Destination $release.PortableDirectory }
-foreach ($file in @('LICENSE','THIRD_PARTY_NOTICES.md')) { Copy-Item -LiteralPath (Join-Path $release.Root $file) -Destination $release.PortableDirectory }
+foreach ($file in @('LICENSE','docs/THIRD_PARTY_NOTICES.md')) { Copy-Item -LiteralPath (Join-Path $release.Root $file) -Destination $release.PortableDirectory }
 $template = Get-Content -LiteralPath (Join-Path $release.Root 'docs/release-notes.template.md') -Raw -Encoding UTF8
 $notes = $template.Replace('{{DISPLAY_VERSION}}',$release.Display).Replace('{{VERSION}}',$release.Version)
 $encoding = New-Object Text.UTF8Encoding($false)

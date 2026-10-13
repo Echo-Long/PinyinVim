@@ -1,8 +1,8 @@
 {
   "files": [
-    ".gitignore", ".gitattributes", "package.json", "package-lock.json", "README.md", "README.zh-CN.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "CHANGELOG.md",
+    ".gitignore", ".gitattributes", "package.json", "package-lock.json", "README.md", "README.zh-CN.md", "LICENSE",
     "assets/branding/README.md", "assets/branding/export-icon.ps1", "assets/branding/pinyinvim-icon.png", "assets/branding/pinyinvim-icon-512.png", "assets/branding/pinyinvim-icon-256.png", "assets/branding/pinyinvim.ico", "assets/branding/pinyinvim-icon-preview.png",
-    "docs/build.md", "docs/release-plan.md", "docs/compatibility.md", "docs/roadmap.md", "docs/portable-readme.md", "docs/portable-readme.en.md", "docs/release-notes.template.md",
+    "docs/build.md", "docs/release-plan.md", "docs/compatibility.md", "docs/roadmap.md", "docs/portable-readme.md", "docs/portable-readme.en.md", "docs/release-notes.template.md", "docs/CHANGELOG.md", "docs/THIRD_PARTY_NOTICES.md",
     ".github/workflows/windows.yml", ".github/workflows/release.yml", ".github/ISSUE_TEMPLATE/bug.yml",
     "native/README.md", "native/build.ps1", "native/start.ps1", "native/package.ps1", "native/test.ps1", "native/release-common.ps1",
     "native/setup-runtime.ps1", "native/runtime-assets.json", "native/download.mjs", "native/regenerate-data.ps1", "native/source-files.json", "native/verify-release.ps1",

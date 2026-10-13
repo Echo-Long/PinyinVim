@@ -191,9 +191,11 @@ The build derives application metadata from `package.json`; pinned runtime versi
 | `native/prototypes/capsules` | Current capsule interface, window effects and settings; retained directory name from development. |
 | `native/tests` | Automated regression and integration contracts. |
 | `assets/branding` | Application icon and branding assets. |
-| `docs` | Build instructions, compatibility, roadmap and release preparation. |
+| `docs` | Build instructions, compatibility, roadmap, changelog and third-party notices. |
 
 The [roadmap](docs/roadmap.md) prioritizes application compatibility, real input-method testing and multi-monitor DPI checks. The [release plan](docs/release-plan.md) describes future source uploads and release artifacts; no release is implied by the presence of those scripts.
+
+See the [changelog](docs/CHANGELOG.md) for version updates and [third-party notices](docs/THIRD_PARTY_NOTICES.md) for component licenses and attribution.
 
 ## Help and contributions
 
@@ -203,4 +205,4 @@ Contributions should preserve the existing Neovim/Neovide architecture and exten
 
 ## License
 
-Project source is licensed under [MIT](LICENSE). Third-party components, dictionaries, fonts and interface icons retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Neovim and Neovide remain the editor and rendering foundations of this project.
+Project source is licensed under [MIT](LICENSE). Third-party components, dictionaries, fonts and interface icons retain their own licenses; see [third-party notices](docs/THIRD_PARTY_NOTICES.md). Neovim and Neovide remain the editor and rendering foundations of this project.

@@ -191,9 +191,11 @@ Windows 自身的通知设置也可能影响通知展示。
 | `native/prototypes/capsules` | 当前胶囊界面、窗口效果与设置；目录名沿用开发阶段命名。 |
 | `native/tests` | 自动回归与集成合同检查。 |
 | `assets/branding` | 应用图标与品牌素材。 |
-| `docs` | 构建、兼容范围、产品路线与发布准备。 |
+| `docs` | 构建、兼容范围、产品路线、更新记录与第三方说明。 |
 
 [产品路线](docs/roadmap.md)优先推进应用适配、真实输入法与多屏 DPI 验收。[发布计划](docs/release-plan.md)说明后续源码上传及产物组织方式；存在发布脚本不代表已经发布。
+
+各版本的改进见[更新记录](docs/CHANGELOG.md)；组件许可与来源见[第三方说明](docs/THIRD_PARTY_NOTICES.md)。
 
 ## 反馈与参与
 
@@ -203,4 +205,4 @@ Windows 自身的通知设置也可能影响通知展示。
 
 ## 开源许可
 
-项目源码采用 [MIT 许可证](LICENSE)。第三方组件、词典、字体和界面图标保留各自许可，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。Neovim 与 Neovide 继续作为本项目的编辑和绘制基础。
+项目源码采用 [MIT 许可证](LICENSE)。第三方组件、词典、字体和界面图标保留各自许可，详见[第三方说明](docs/THIRD_PARTY_NOTICES.md)。Neovim 与 Neovide 继续作为本项目的编辑和绘制基础。
