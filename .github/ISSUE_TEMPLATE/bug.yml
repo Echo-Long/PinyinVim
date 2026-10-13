@@ -24,6 +24,6 @@ body:
     id: actual
     attributes:
       label: 实际结果
-      description: 是否出现通知？文字是否进入剪贴板？不要上传草稿、整份个人配置或含隐私的截图。
+      description: 是否已开启“系统通知”（默认关闭）？文字是否进入剪贴板或原输入框？不要上传草稿、整份个人配置或含隐私的截图。
     validations:
       required: true

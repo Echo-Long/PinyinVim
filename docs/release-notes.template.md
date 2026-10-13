@@ -2,7 +2,11 @@
 
 Windows x64 便携版，Neovim + Neovide + 本地中文导航，MIT 开源。
 
-[查看真实界面与使用教程](https://github.com/Echo-Long/PinyinVim/blob/main/README.zh-CN.md) · [完整演示 MP4 / Download the full demo](https://github.com/Echo-Long/PinyinVim/raw/refs/heads/main/docs/media/demo.mp4)
+[查看真实界面与使用教程](https://github.com/Echo-Long/PinyinVim/blob/main/README.zh-CN.md) · [下载完整演示 MP4 / Download the full demo](https://github.com/Echo-Long/PinyinVim/raw/refs/heads/main/docs/media/demo.mp4)
+
+完整演示 / Full demo (1 min 37.5 s):
+
+https://github.com/user-attachments/assets/39ca15ec-b495-401e-8555-697e5b66277c
 
 本次补丁更新包含 V0.3.0 发布后的基础功能修复，保留毛玻璃、十套主题、背景图片、独立设置和自定义快捷键：
 

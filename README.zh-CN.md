@@ -35,11 +35,20 @@
 
 ## 演示
 
+点击下方播放器观看完整演示（1 分 37.5 秒）：
+
+https://github.com/user-attachments/assets/39ca15ec-b495-401e-8555-697e5b66277c
+
+[下载演示视频 MP4](docs/media/demo.mp4?raw=true)
+
+录制展示中英混排中的光标定位、Vim 编辑与撤销、主题切换、背景图片、外观设置，以及向记事本提交回填。截图和录制均来自实际应用，展示录制时的用户配置。
+
+<details>
+<summary>展开查看短定位预览（16 秒）</summary>
+
 ![真实编辑器中的中文拼音首字母与英文字母定位](docs/media/mixed-navigation.gif)
 
-[下载并播放完整演示（MP4，1 分 37.5 秒）](docs/media/demo.mp4?raw=true)
-
-短预览展示中英混排中的光标定位；完整录制还包括 Vim 编辑与撤销、主题切换、背景图片、外观设置，以及向记事本提交回填。截图和录制均来自实际应用，展示录制时的用户配置。
+</details>
 
 ## 开始使用
 

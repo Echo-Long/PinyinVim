@@ -14,3 +14,9 @@
 完整演示仅裁去原录制开头 2 秒与结尾 2.5 秒，保留中间内容与音频。GIF 是原录制第 14–30 秒的片段，裁到编辑器区域以便阅读。
 
 The full demo keeps the original demonstration and audio, trimming only 2 seconds from the start and 2.5 seconds from the end. The GIF uses seconds 14–30 of the original recording and is cropped to the editor area.
+
+README 的完整视频使用 GitHub 原生附件播放器；下载入口仍保留仓库里的 `demo.mp4`。嵌入时，将附件地址单独放在一段中，避免将它包装成普通 Markdown 链接。
+
+The README uses GitHub's native attachment player for the full recording, with the repository's `demo.mp4` kept as a download. Keep the attachment URL in its own paragraph so GitHub renders it as a player.
+
+https://github.com/user-attachments/assets/39ca15ec-b495-401e-8555-697e5b66277c

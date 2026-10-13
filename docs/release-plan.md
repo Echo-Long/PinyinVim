@@ -7,7 +7,7 @@
 1. GitHub 仓库：上传 `dist/<显示版本>/source/PinyinVim` 中的源码；清单由 `native/source-files.json` 管理。保留 MIT、第三方许可、构建文档、Windows CI 和问题模板。
 2. GitHub Release：上传便携 ZIP、源码 ZIP、SHA256SUMS.txt，正文使用生成的 RELEASE_NOTES.md。Tag 和标题均使用 `package.json` 派生的 `V<版本>`。
 3. 本地工作目录保留历史版本、原型、个人草稿与诊断。它们不属于公开源码或成品，不应整目录上传。
-4. 展示素材放在 `docs/media`，随公开源码保留。完整演示视频也可作为 Release 的演示附件上传；它独立于便携包、源码包和 SHA256SUMS.txt 这三个产品发布文件。
+4. 展示素材放在 `docs/media`，随公开源码保留。README 内播放使用 GitHub 视频附件，把生成的 `github.com/user-attachments/assets/...` 地址单独放在一段中；仓库 MP4 和 Release 演示附件保留为下载入口。演示附件独立于便携包、源码包和 SHA256SUMS.txt 这三个产品发布文件。
 
 ## 发布顺序
 

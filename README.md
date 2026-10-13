@@ -35,11 +35,20 @@ Chinese navigation is processed locally. PinyinVim does not call AI services or 
 
 ## Demo
 
+Play the full demonstration here (1 min 37.5 s):
+
+https://github.com/user-attachments/assets/39ca15ec-b495-401e-8555-697e5b66277c
+
+[Download the demo as an MP4](docs/media/demo.mp4?raw=true)
+
+The recording demonstrates character navigation in mixed Chinese and English text, Vim editing and undo, themes, background images, appearance settings, and submitting text back to Notepad. All images and recordings show the real application with the recording user's settings.
+
+<details>
+<summary>Short navigation preview (16 seconds)</summary>
+
 ![Mixed Chinese and English character navigation in the actual editor](docs/media/mixed-navigation.gif)
 
-[Download and play the full demo (MP4, 1 min 37.5 s)](docs/media/demo.mp4?raw=true)
-
-The short preview shows navigation in mixed Chinese and English text. The full recording also demonstrates Vim editing and undo, themes, background images, appearance settings, and submitting text back to Notepad. All images and recordings show the real application with the recording user's settings.
+</details>
 
 ## Getting started
 
