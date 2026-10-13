@@ -4,6 +4,7 @@ local api, fn = vim.api, vim.fn
 local M = { wins = {}, bufs = {}, message = '', pending = '', cmdlines = {}, history = {} }
 local ns = api.nvim_create_namespace('pinyinvim.capsules')
 local queued, started, timer = false, false, nil
+local painted_pending
 local buttons = { 'mode', 'pending', 'settings', 'submit' }
 local icons = { settings = '\u{e001}', submit = '\u{e002}' }
 local blank_border = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' }
@@ -246,13 +247,14 @@ function M.render()
   if M.hovered == 'submit' then M.hover_hint = M.submission_hint() end
   local pending = M.pending
   local chinese = vim.g.pinyinvim_pending or ''
-  -- getchar() in the existing Chinese mapping clears native showcmd while
-  -- an operator is still pending. Read that live operator state as well.
-  if chinese ~= '' and fn.mode(1):sub(1, 2) == 'no' and vim.v.operator ~= ''
-    and not pending:find(vim.v.operator, 1, true) then
-    pending = pending .. vim.v.operator
+  -- The Chinese mapping already exposes the complete count + find command.
+  -- Native showcmd may still contain that count, so it must not be appended.
+  if chinese ~= '' then
+    pending = chinese
+    if fn.mode(1):sub(1, 2) == 'no' and vim.v.operator ~= '' then
+      pending = vim.v.operator .. pending
+    end
   end
-  if chinese ~= '' and not pending:find(chinese, 1, true) then pending = pending .. chinese end
   local recording = fn.reg_recording()
   if recording ~= '' then pending = '@' .. recording end
   local texts = {mode = mode_label(), pending = fit(pending, 8), settings = icons.settings, submit = icons.submit}
@@ -331,6 +333,17 @@ function M.render()
     M.hint_key = hint_key
   end
 
+end
+
+local function render_pending()
+  if not started then return end
+  M.render()
+  -- getchar() does not redraw changed extmarks itself. Flush only when the
+  -- displayed command changes, including cancellation; idle ticks stay idle.
+  if M.control_texts.pending ~= painted_pending then
+    painted_pending = M.control_texts.pending
+    api.nvim__redraw({ flush = true })
+  end
 end
 
 local function refresh()
@@ -457,6 +470,13 @@ local function ui_event(event, ...)
   if event == 'msg_showmode' or event == 'msg_ruler' then return true end
   if event:sub(1, 4) ~= 'msg_' and event:sub(1, 8) ~= 'cmdline_' then return end
   local args = { ... }
+  if event == 'msg_showcmd' then
+    M.pending = chunks_text(args[1])
+    -- Native count/operator waits can delay scheduled callbacks until the
+    -- next key. This event normally runs in safe context and can paint now.
+    if vim.in_fast_event() then vim.schedule(render_pending) else render_pending() end
+    return true
+  end
   -- Mark messages handled before deferring API mutations out of fast context.
   vim.schedule(function()
     if not started then return end
@@ -468,8 +488,6 @@ local function ui_event(event, ...)
       if #M.history > 100 then table.remove(M.history, 1) end
     elseif event == 'msg_clear' then
       M.message, M.message_error = '', false
-    elseif event == 'msg_showcmd' then
-      M.pending = chunks_text(args[1])
     elseif event == 'msg_history_show' then
       local messages = {}
       for _, entry in ipairs(args[1] or {}) do messages[#messages + 1] = chunks_text(entry[2]) end
@@ -606,7 +624,7 @@ function M.start()
   -- The Chinese f/t mapping waits in getchar() and exposes its pending key as
   -- a global. A small timer reads that state; it never consumes or adds keys.
   timer = vim.uv.new_timer()
-  timer:start(80, 80, vim.schedule_wrap(M.render))
+  timer:start(80, 80, vim.schedule_wrap(render_pending))
   api.nvim_create_autocmd('VimLeavePre', { group = group, callback = function()
     started = false
     timer:stop(); timer:close()

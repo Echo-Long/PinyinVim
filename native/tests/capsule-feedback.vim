@@ -3,6 +3,7 @@ let g:copy_calls = 0
 function! PinyinClipboardCopied() abort
   let g:copy_calls += 1
 endfunction
+try
 lua << EOF
 local value = {}
 vim.g.clipboard = {
@@ -22,8 +23,12 @@ capsules.copy()
 assert(vim.g.copy_calls == 1, 'explicit draft copy emits one clipboard notification event')
 assert(table.concat(value[1], '\n') == 'fixture text', 'copy uses the Neovim clipboard provider')
 EOF
+lua dofile('native/tests/capsule-pending.lua')
+catch
+  call add(v:errors, v:exception)
+endtry
 if len(v:errors)
   call writefile(v:errors, 'native/tests/capsule-feedback.failures')
-  cquit
+  cquit 1
 endif
 qa!
