@@ -821,7 +821,7 @@ namespace PinyinVim.Native
 
         Dictionary<string,object> LoadSettings()
         {
-            var values = new Dictionary<string,object> { {"notifications",true},{"pinyin",true},{"words",true},{"ime",true},{"dark",false},{"clearOnClose",false},{"fontSize",14} };
+            var values = new Dictionary<string,object> { {"notifications",false},{"pinyin",true},{"words",true},{"ime",true},{"dark",false},{"clearOnClose",false},{"fontSize",14} };
             try
             {
                 var saved = json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(profile,"settings.json")));
@@ -910,9 +910,10 @@ namespace PinyinVim.Native
         void ShowNotification(int timeout, string title, string text, ToolTipIcon kind)
         {
             object enabled;
-            // Missing values keep notifications enabled for older profiles.
-            if (settings != null && settings.TryGetValue("notifications", out enabled)
-                && enabled is bool && !(bool)enabled) return;
+            // Notifications require an explicit opt-in, including old profiles
+            // without this setting and malformed values.
+            if (settings == null || !settings.TryGetValue("notifications", out enabled)
+                || !(enabled is bool) || !(bool)enabled) return;
             tray.ShowBalloonTip(timeout, title, text, kind);
         }
         static Icon MakeIcon()

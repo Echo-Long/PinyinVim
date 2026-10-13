@@ -5,6 +5,7 @@ $release = Get-PinyinRelease
 $root = (Resolve-Path -LiteralPath $Directory).Path
 $manifest = Get-Content -LiteralPath (Join-Path $root 'manifest.json') -Raw | ConvertFrom-Json
 if ($manifest.version -ne $release.Version) { throw 'Release version mismatch' }
+if ($manifest.notificationDefault -ne $false -or $manifest.clipboardNotification -ne 'controlled by settings.notifications; disabled by default') { throw 'Notification default metadata mismatch' }
 $entry = Join-Path $root 'PinyinVim.exe'
 $fileVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($entry)
 if ($fileVersion.FileVersion -ne $release.FileVersion -or $fileVersion.ProductVersion -ne $release.Version) { throw 'Executable metadata version mismatch' }

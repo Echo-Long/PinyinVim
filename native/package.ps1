@@ -1,4 +1,4 @@
-param([switch]$UseExistingBuild, [switch]$FocusedUiChecks)
+﻿param([switch]$UseExistingBuild, [switch]$FocusedUiChecks)
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'release-common.ps1')
 $release = Get-PinyinRelease
@@ -23,7 +23,7 @@ $portableReadme = (Get-Content -LiteralPath (Join-Path $release.Root 'docs/porta
 [IO.File]::WriteAllText((Join-Path $release.PortableDirectory 'README-zh.md'),$portableReadme,$encoding)
 $portableEnglish = (Get-Content -LiteralPath (Join-Path $release.Root 'docs/portable-readme.en.md') -Raw -Encoding UTF8).Replace('{{DISPLAY_VERSION}}',$release.Display)
 [IO.File]::WriteAllText((Join-Path $release.PortableDirectory 'README.md'),$portableEnglish,$encoding)
-$manifest = [ordered]@{version=$release.Version;displayVersion=$release.Display;entry='PinyinVim.exe';platform='windows-x64';clipboardNotification='controlled by settings.notifications; enabled by default';files=@()}
+$manifest = [ordered]@{version=$release.Version;displayVersion=$release.Display;entry='PinyinVim.exe';platform='windows-x64';notificationDefault=$false;clipboardNotification='controlled by settings.notifications; disabled by default';files=@()}
 foreach ($file in @(Get-ChildItem -LiteralPath $release.PortableDirectory -Recurse -File | Sort-Object FullName)) {
     $relative = $file.FullName.Substring($release.PortableDirectory.Length+1).Replace('\','/')
     $manifest.files += [ordered]@{path=$relative;sha256=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash}

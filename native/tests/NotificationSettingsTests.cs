@@ -29,14 +29,14 @@ class NotificationSettingsTests
         hostType.GetField("json", flags).SetValue(host, new JavaScriptSerializer());
         var load = hostType.GetMethod("LoadSettings", flags);
         var defaults = (Dictionary<string, object>)load.Invoke(host, null);
-        Check((bool)defaults["notifications"], "Fresh profiles must enable notifications");
+        Check(!(bool)defaults["notifications"], "Fresh profiles must disable notifications");
         Check((int)defaults["backgroundTransparency"] == 50 && (int)defaults["capsuleTransparency"] == 20 && (int)defaults["blurRadius"] == 5,
             "Fresh appearance must use 50% background, 20% capsules and 5px blur");
         string settingsPath = Path.Combine(profile, "settings.json");
         foreach (string json in new[] {"{\"words\":false}", "{\"notifications\":true}", "{\"notifications\":\"false\"}"}) {
             File.WriteAllText(settingsPath, json);
             var loaded = (Dictionary<string, object>)load.Invoke(host, null);
-            Check((bool)loaded["notifications"], "Legacy or malformed preferences changed notification default");
+            Check((bool)loaded["notifications"] == (json == "{\"notifications\":true}"), "Saved opt-in must survive; missing or malformed values must default off");
             if (!json.Contains("notifications")) Check(!(bool)loaded["words"], "Legacy word preference must survive");
         }
         File.WriteAllText(settingsPath, "{\"notifications\":false,\"theme\":\"lavender\",\"clearOnClose\":true}");
@@ -45,6 +45,15 @@ class NotificationSettingsTests
         Check((string)settings["theme"] == "lavender" && (bool)settings["clearOnClose"], "Loading opt-out changed unrelated preferences");
         hostType.GetField("settings", flags).SetValue(host, settings);
         var notify = hostType.GetMethod("ShowNotification", flags);
+        foreach(var unknown in new[]{new Dictionary<string,object>(), new Dictionary<string,object>{{"notifications","on"}}}) {
+            hostType.GetField("settings",flags).SetValue(host,unknown);
+            notify.Invoke(host,new object[]{1800,"fixture","fixture",ToolTipIcon.Info});
+            Check(true,"Unknown or malformed notification preference must not dispatch");
+        }
+        hostType.GetField("settings",flags).SetValue(host,null);
+        notify.Invoke(host,new object[]{1800,"fixture","fixture",ToolTipIcon.Info});
+        Check(true,"Uninitialized preferences must not dispatch");
+        hostType.GetField("settings",flags).SetValue(host,settings);
         foreach (var kind in new[] {ToolTipIcon.Info, ToolTipIcon.Error}) {
             // No tray exists: a muted notification must return before OS dispatch.
             notify.Invoke(host, new object[] {1800, "fixture", "fixture", kind});

@@ -11,7 +11,7 @@ The system needs .NET Framework 4.8, Microsoft Visual C++ v14 x64 runtime and a 
 - `F2`: settings for shortcuts, themes, background images, transparency and blur.
 - Close, minimize and `Alt+F4` hide the editor. Use **Exit** in the tray menu to quit.
 
-Default appearance: background transparency **50%**, capsule transparency **20%**, Gaussian blur **5 px**. Under `F2 → 编辑与草稿`, **系统通知** controls system notifications. It is on by default; turning it off leaves copying, pasting and draft saving enabled.
+Default appearance: background transparency **50%**, capsule transparency **20%**, Gaussian blur **5 px**. Under `F2 → 编辑与草稿`, **系统通知** controls system notifications. It is off by default; you can enable or disable it at any time. Your saved choice survives restarts and upgrades. Copying, pasting and draft saving work with notifications disabled.
 
 We have tested many Windows applications. **Windows taskbar search and WeChat** require manual clipboard pasting. A “paste sent” notification confirms shortcut dispatch, not receipt. The app does not send Enter to the target, send chat messages or retry pasting. Previous clipboard contents are not restored.
 

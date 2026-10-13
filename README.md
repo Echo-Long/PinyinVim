@@ -131,7 +131,7 @@ Move the window by dragging an empty area of its outer shell; resize it from the
 
 ## Control system notifications
 
-Under `F2 → 编辑与草稿`, turn **System notifications** (`系统通知`) on or off. It is **on by default**, takes effect immediately and is remembered after restarting.
+Under `F2 → 编辑与草稿`, turn **System notifications** (`系统通知`) on or off. It is **off by default**, takes effect immediately and is remembered after restarting. An existing saved choice is preserved when upgrading.
 
 When on, successful copies and non-empty submissions request a system notification showing the result; startup status may also notify you. When off, these system notifications are suppressed. Clipboard copying, paste attempts and automatic draft saving still work, and in-editor feedback remains visible.
 
