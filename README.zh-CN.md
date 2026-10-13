@@ -9,9 +9,18 @@
 
 在独立浮窗里专心写作，用熟悉的 Vim 动作编辑，再把文字带回原来的应用。拼音浮笺使用真实 Neovim 编辑内核，加入本地中文导航，配合毛玻璃界面和可自定义的主题。
 
-> **运行平台：**Windows x64，应用界面为简体中文。产品版本统一定义在 [package.json](package.json)。
+<p align="center">
+  <a href="https://github.com/Echo-Long/PinyinVim/releases/latest"><strong>下载最新发布版</strong></a> · <a href="#开始使用">快速上手</a> · <a href="#演示">观看演示</a>
+</p>
 
-[快速上手](#开始使用) · [中英混排](#中文增强与-vim-操作) · [Vim 入门](#vim-入门) · [调整界面](#调整界面) · [通知开关](#系统通知) · [应用适配](#提交文字与应用适配)
+<p align="center">
+  <img src="docs/media/editor-hero.png" width="900" alt="拼音浮笺真实界面：毛玻璃编辑区与自定义背景图片" />
+</p>
+<p align="center"><em>真实应用截图，展示自定义背景图片效果。</em></p>
+
+> **已发布 Windows x64 便携版。** 应用界面为简体中文，产品版本统一定义在 [package.json](package.json)。
+
+[观看演示](#演示) · [快速上手](#开始使用) · [中英混排](#中文增强与-vim-操作) · [Vim 入门](#vim-入门) · [调整界面](#调整界面) · [通知开关](#系统通知) · [应用适配](#提交文字与应用适配)
 
 ## 能做什么
 
@@ -24,11 +33,19 @@
 
 中文导航在本地处理。编辑期间不调用 AI 服务，也不上传草稿正文。
 
+## 演示
+
+![真实编辑器中的中文拼音首字母与英文字母定位](docs/media/mixed-navigation.gif)
+
+[查看完整演示（1 分 37.5 秒）](docs/media/demo.mp4) · [下载 MP4 视频](docs/media/demo.mp4?raw=true)
+
+短预览展示中英混排中的光标定位；完整录制还包括 Vim 编辑与撤销、主题切换、背景图片、外观设置，以及向记事本提交回填。截图和录制均来自实际应用，展示录制时的用户配置。
+
 ## 开始使用
 
-从 [Releases](https://github.com/Echo-Long/PinyinVim/releases) 下载 Windows x64 便携包。将**整个文件夹**解压到可写目录，打开 `PinyinVim.exe`。Neovim、Neovide、词典和备用字体随包附带，运行时无需安装 Node.js、Python 或独立的 Vim。
+从[最新发布版](https://github.com/Echo-Long/PinyinVim/releases/latest)下载 Windows x64 便携包。将**整个文件夹**解压到可写目录，打开 `PinyinVim.exe`。Neovim、Neovide、词典和备用字体随包附带，运行时无需安装 Node.js、Python 或独立的 Vim。
 
-系统需要 .NET Framework 4.8、Microsoft Visual C++ v14 x64 运行库和可用的图形驱动。若启动提示缺少 `VCRUNTIME140.dll`，请查看[便携版说明](docs/portable-readme.md)，从[微软官方页面](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)获取对应运行库。发布准备期间，也可以[从源码构建](#从源码构建与测试)。
+系统需要 .NET Framework 4.8、Microsoft Visual C++ v14 x64 运行库和可用的图形驱动。若启动提示缺少 `VCRUNTIME140.dll`，请查看[便携版说明](docs/portable-readme.md)，从[微软官方页面](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)获取对应运行库。源码已公开在本仓库，也可以[从源码构建](#从源码构建与测试)。
 
 ### 一分钟写好第一份草稿
 
@@ -37,6 +54,8 @@
 3. 按 `Ctrl+Enter` 提交。适配的输入框会尝试回填一次；仅剪贴板模式下，切回需要输入的位置，自行按 `Ctrl+V` 粘贴。
 
 暂时不提交时，在 Normal 模式按 `Esc` 收起，下次继续写。按 `F2` 打开设置，修改会自动保存并应用。
+
+`Ctrl+Enter` 按下即开始提交并立即收起窗口；长按同样只提交一次。
 
 ### 默认快捷键
 
@@ -115,6 +134,14 @@
 
 按 `F2 → 外观` 打开设置，修改立即应用并自动保存。
 
+<p align="center">
+  <img src="docs/media/editor-rose.png" width="430" alt="拼音浮笺玫瑰色主题" />
+  <img src="docs/media/editor-background.png" width="430" alt="拼音浮笺自定义背景图片与半透明胶囊面板" />
+</p>
+<p align="center"><em>录制中的玫瑰色主题与背景图片效果。</em></p>
+
+对应控件可查看[外观设置截图](docs/media/settings-appearance.png)。截图展示自定义配置，默认数值见下表后的说明。
+
 | 设置 | 怎么调整 |
 | --- | --- |
 | **主题色** | 在雾蓝、柠檬黄、薰衣草、薄荷绿、蜜桃、玫瑰、晴空蓝、砂岩、森林、石墨十套配色中选择，改变外壳与胶囊的颜色。 |
@@ -191,9 +218,10 @@ Windows 自身的通知设置也可能影响通知展示。
 | `native/prototypes/capsules` | 当前胶囊界面、窗口效果与设置；目录名沿用开发阶段命名。 |
 | `native/tests` | 自动回归与集成合同检查。 |
 | `assets/branding` | 应用图标与品牌素材。 |
+| `docs/media` | 真实界面截图、动态预览与完整演示视频。 |
 | `docs` | 构建、兼容范围、产品路线、更新记录与第三方说明。 |
 
-[产品路线](docs/roadmap.md)优先推进应用适配、真实输入法与多屏 DPI 验收。[发布计划](docs/release-plan.md)说明后续源码上传及产物组织方式；存在发布脚本不代表已经发布。
+[产品路线](docs/roadmap.md)优先推进应用适配、真实输入法与多屏 DPI 验收。已发布版本可从 [Releases](https://github.com/Echo-Long/PinyinVim/releases) 下载；打包、校验和上传方式见[发布流程](docs/release-plan.md)。
 
 各版本的改进见[更新记录](docs/CHANGELOG.md)；组件许可与来源见[第三方说明](docs/THIRD_PARTY_NOTICES.md)。
 

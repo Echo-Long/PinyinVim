@@ -9,9 +9,18 @@
 
 Write in a focused floating window, edit with real Neovim, then return your text to the application you were using. PinyinVim combines familiar Vim editing with local Chinese navigation, a frosted-glass interface, and customizable themes.
 
-> **Platform:** Windows x64. The application interface is in Simplified Chinese. The product version is defined in [package.json](package.json).
+<p align="center">
+  <a href="https://github.com/Echo-Long/PinyinVim/releases/latest"><strong>Download the latest release</strong></a> · <a href="#getting-started">Quick start</a> · <a href="#demo">Watch the demo</a>
+</p>
 
-[Quick start](#getting-started) · [Chinese navigation](#chinese-navigation) · [Vim basics](#vim-basics) · [Appearance](#customize-the-interface) · [Notifications](#control-system-notifications) · [Compatibility](#submitting-text-and-compatibility)
+<p align="center">
+  <img src="docs/media/editor-hero.png" width="900" alt="PinyinVim floating editor with a frosted-glass interface and a custom background image" />
+</p>
+<p align="center"><em>Actual application screenshot with a custom background image.</em></p>
+
+> **Released for Windows x64.** The application interface is in Simplified Chinese. The product version is defined in [package.json](package.json).
+
+[Demo](#demo) · [Quick start](#getting-started) · [Chinese navigation](#chinese-navigation) · [Vim basics](#vim-basics) · [Appearance](#customize-the-interface) · [Notifications](#control-system-notifications) · [Compatibility](#submitting-text-and-compatibility)
 
 ## Features
 
@@ -24,11 +33,19 @@ Write in a focused floating window, edit with real Neovim, then return your text
 
 Chinese navigation is processed locally. PinyinVim does not call AI services or upload your draft while you edit.
 
+## Demo
+
+![Mixed Chinese and English character navigation in the actual editor](docs/media/mixed-navigation.gif)
+
+[View the full demo (1 min 37.5 s)](docs/media/demo.mp4) · [Download the MP4](docs/media/demo.mp4?raw=true)
+
+The short preview shows navigation in mixed Chinese and English text. The full recording also demonstrates Vim editing and undo, themes, background images, appearance settings, and submitting text back to Notepad. All images and recordings show the real application with the recording user's settings.
+
 ## Getting started
 
-Download the Windows x64 portable archive from [Releases](https://github.com/Echo-Long/PinyinVim/releases). Extract the **entire folder** into a writable location, then open `PinyinVim.exe`. Neovim, Neovide, dictionaries and a fallback font are bundled; Node.js, Python and a separate Vim installation are not needed to run it.
+Download the Windows x64 portable archive from the [latest release](https://github.com/Echo-Long/PinyinVim/releases/latest). Extract the **entire folder** into a writable location, then open `PinyinVim.exe`. Neovim, Neovide, dictionaries and a fallback font are bundled; Node.js, Python and a separate Vim installation are not needed to run it.
 
-System requirements include .NET Framework 4.8, Microsoft Visual C++ v14 x64 runtime and a working graphics driver. If startup reports a missing `VCRUNTIME140.dll`, see the [portable guide](docs/portable-readme.md) and Microsoft's [official runtime download](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170). You can also [build from source](#build-and-test) while the release is in preparation.
+System requirements include .NET Framework 4.8, Microsoft Visual C++ v14 x64 runtime and a working graphics driver. If startup reports a missing `VCRUNTIME140.dll`, see the [portable guide](docs/portable-readme.md) and Microsoft's [official runtime download](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170). Source code is available in this repository; see [build and test](#build-and-test).
 
 ### Your first draft
 
@@ -37,6 +54,8 @@ System requirements include .NET Framework 4.8, Microsoft Visual C++ v14 x64 run
 3. Press `Ctrl+Enter` to submit. In compatible input fields, PinyinVim attempts to paste back once. In clipboard-only cases, return to the desired field and press `Ctrl+V` yourself.
 
 To keep writing later, press `Esc` in Normal mode to hide the window. Use `F2` for settings; changes are saved and applied automatically.
+
+Submission starts when you press `Ctrl+Enter` and hides the editor immediately. Holding the keys down still submits only once.
 
 ### Default shortcuts
 
@@ -115,6 +134,14 @@ Use `Ctrl+C` for the Windows clipboard; `yy` and `p` use Vim registers. App shor
 
 Open `F2 → 外观`. Changes apply immediately and are saved automatically.
 
+<p align="center">
+  <img src="docs/media/editor-rose.png" width="430" alt="PinyinVim with a rose-colored theme" />
+  <img src="docs/media/editor-background.png" width="430" alt="PinyinVim with a custom background image and translucent panels" />
+</p>
+<p align="center"><em>Rose theme and custom background image, captured from the demo.</em></p>
+
+See the [appearance settings screenshot](docs/media/settings-appearance.png) for the controls below. Screenshots show custom settings; the default values are listed after the table.
+
 | Setting | How to use it |
 | --- | --- |
 | **Theme color** (`主题色`) | Pick one of ten palettes: Mist Blue, Lemon, Lavender, Mint, Peach, Rose, Sky, Sand, Forest or Graphite. This changes the shell and capsule colors. |
@@ -191,9 +218,10 @@ The build derives application metadata from `package.json`; pinned runtime versi
 | `native/prototypes/capsules` | Current capsule interface, window effects and settings; retained directory name from development. |
 | `native/tests` | Automated regression and integration contracts. |
 | `assets/branding` | Application icon and branding assets. |
+| `docs/media` | Actual interface screenshots, the short preview and the full demo video. |
 | `docs` | Build instructions, compatibility, roadmap, changelog and third-party notices. |
 
-The [roadmap](docs/roadmap.md) prioritizes application compatibility, real input-method testing and multi-monitor DPI checks. The [release plan](docs/release-plan.md) describes future source uploads and release artifacts; no release is implied by the presence of those scripts.
+The [roadmap](docs/roadmap.md) prioritizes application compatibility, real input-method testing and multi-monitor DPI checks. Published downloads are available in [Releases](https://github.com/Echo-Long/PinyinVim/releases); the [release workflow](docs/release-plan.md) documents packaging, verification and publication.
 
 See the [changelog](docs/CHANGELOG.md) for version updates and [third-party notices](docs/THIRD_PARTY_NOTICES.md) for component licenses and attribution.
 
